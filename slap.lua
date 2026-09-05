@@ -1,183 +1,290 @@
--- Script Hub: Find Who Slapped - Auto Strong Slap & Detector
+-- ==========================================================
+-- 👑 FIND WHO SLAPPED - PREMIUM HUB V8 (MOBILE OPTIMIZED) 👑
+-- ==========================================================
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
-local targetParent = CoreGui
-pcall(function()
-    if gethui then targetParent = gethui() end
-end)
 
-if targetParent:FindFirstChild("FindWhoSlappedPro") then
-    targetParent.FindWhoSlappedPro:Destroy()
+-- 1. BẢO VỆ GIAO DIỆN & TÌM ĐƯỜNG DẪN HIỆN UI TỐI ƯU NHẤT CHO MOBILE
+local function getSafeUIPath()
+    local success, result = pcall(function() return gethui() end)
+    if success and result then return result end
+    local success2, result2 = pcall(function() return CoreGui end)
+    if success2 and result2 then return result2 end
+    return player:WaitForChild("PlayerGui")
 end
 
--- 1. TẠO GIAO DIỆN MENU NỔI TRÊN MÀN HÌNH ĐIỆN THOẠI
+local targetParent = getSafeUIPath()
+if targetParent:FindFirstChild("FindWhoSlappedPremium") then
+    targetParent.FindWhoSlappedPremium:Destroy()
+end
+
+-- 2. TẠO GIAO DIỆN (UI) HIỆN ĐẠI
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "FindWhoSlappedPro"
+ScreenGui.Name = "FindWhoSlappedPremium"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = targetParent
 
-local ToggleBtn = Instance.new("TextButton", ScreenGui)
-ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
-ToggleBtn.Position = UDim2.new(0.02, 0, 0.35, 0)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-ToggleBtn.Text = "🖐️"
-ToggleBtn.TextSize = 20
+-- Nút Logo thu gọn
+local ToggleBtn = Instance.new("ImageButton", ScreenGui)
+ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
+ToggleBtn.Position = UDim2.new(0.02, 0, 0.2, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+ToggleBtn.Image = "rbxassetid://10618928818" -- Bàn tay tát Icon
 ToggleBtn.Active = true
 ToggleBtn.Draggable = true
 Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
-Instance.new("UIStroke", ToggleBtn).Color = Color3.fromRGB(255, 100, 100)
+local stroke1 = Instance.new("UIStroke", ToggleBtn)
+stroke1.Color = Color3.fromRGB(255, 215, 0) -- Viền vàng VIP
+stroke1.Thickness = 2
 
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 240, 0, 225)
-MainFrame.Position = UDim2.new(0.08, 0, 0.35, 0)
+MainFrame.Size = UDim2.new(0, 260, 0, 280)
+MainFrame.Position = UDim2.new(0.15, 0, 0.2, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
-Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(255, 100, 100)
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+local stroke2 = Instance.new("UIStroke", MainFrame)
+stroke2.Color = Color3.fromRGB(255, 215, 0)
+stroke2.Thickness = 2
 
 local menuVisible = true
 ToggleBtn.MouseButton1Click:Connect(function()
     menuVisible = not menuVisible
     MainFrame.Visible = menuVisible
-    ToggleBtn.Text = menuVisible and "🖐️" or "👁️"
 end)
 
+-- Tiêu đề
 local Title = Instance.new("TextLabel", MainFrame)
-Title.Size = UDim2.new(1, 0, 0, 28)
+Title.Size = UDim2.new(1, 0, 0, 35)
 Title.BackgroundTransparency = 1
-Title.Text = "⚡ SLAP PRO: AUTO & DETECT"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 10
+Title.Text = "👑 SLAP HUB PREMIUM"
+Title.TextColor3 = Color3.fromRGB(255, 215, 0)
+Title.Font = Enum.Font.GothamBlack
+Title.TextSize = 14
 
 local StatusText = Instance.new("TextLabel", MainFrame)
-StatusText.Size = UDim2.new(1, 0, 0, 22)
-StatusText.Position = UDim2.new(0, 0, 0, 26)
+StatusText.Size = UDim2.new(1, 0, 0, 20)
+StatusText.Position = UDim2.new(0, 0, 0, 35)
 StatusText.BackgroundTransparency = 1
-StatusText.Text = "Trạng thái: Đang theo dõi..."
+StatusText.Text = "Sẵn sàng thống trị server!"
 StatusText.TextColor3 = Color3.fromRGB(150, 255, 150)
 StatusText.Font = Enum.Font.Gotham
-StatusText.TextSize = 9
+StatusText.TextSize = 11
 
-local function createButton(text, yPos, color)
+-- Hàm tạo nút chuẩn VIP
+local function createButton(text, yPos, color1, color2)
     local btn = Instance.new("TextButton", MainFrame)
-    btn.Size = UDim2.new(0.9, 0, 0, 32)
+    btn.Size = UDim2.new(0.9, 0, 0, 35)
     btn.Position = UDim2.new(0.05, 0, 0, yPos)
-    btn.BackgroundColor3 = color
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 10
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
+    btn.TextSize = 11
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    
+    local gradient = Instance.new("UIGradient", btn)
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, color1),
+        ColorSequenceKeypoint.new(1, color2)
+    }
     return btn
 end
 
-local DetectorBtn = createButton("🔍 ĐOÁN NGƯỜI TÁT: [BẬT]", 55, Color3.fromRGB(50, 150, 50))
-local AutoStrongSlapBtn = createButton("💥 TỰ ĐỘNG TÁT MẠNH: [TẮT]", 95, Color3.fromRGB(180, 50, 50))
-local ClearLogBtn = createButton("🧹 XÓA LỊCH SỬ THÔNG BÁO", 135, Color3.fromRGB(60, 60, 80))
-local UnloadBtn = createButton("❌ ĐÓNG SCRIPT", 175, Color3.fromRGB(120, 40, 40))
+local AutoSlapBtn = createButton("💥 AUTO TÁT (SUPER HIT): TẮT", 65, Color3.fromRGB(180, 40, 40), Color3.fromRGB(120, 20, 20))
+local DetectorBtn = createButton("🔍 CẢNH BÁO KẺ TÁT: TẮT", 110, Color3.fromRGB(40, 180, 40), Color3.fromRGB(20, 120, 20))
+local ESPBtn = createButton("👁️ NHÌN XUYÊN TƯỜNG (ESP): TẮT", 155, Color3.fromRGB(40, 100, 180), Color3.fromRGB(20, 60, 120))
+local SpeedBtn = createButton("⚡ HACK TỐC ĐỘ CHẠY", 200, Color3.fromRGB(150, 80, 180), Color3.fromRGB(100, 40, 120))
+local CloseBtn = createButton("❌ ĐÓNG MENU", 240, Color3.fromRGB(60, 60, 60), Color3.fromRGB(30, 30, 30))
 
--- 2. TÍNH NĂNG ĐOÁN / PHÁT HIỆN NGƯỜI TÁT (SLAP DETECTOR)
-local detectorEnabled = true
-DetectorBtn.MouseButton1Click:Connect(function()
-    detectorEnabled = not detectorEnabled
-    if detectorEnabled then
-        DetectorBtn.Text = "🔍 ĐOÁN NGƯỜI TÁT: [BẬT]"
-        DetectorBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
-        StatusText.Text = "Đã bật tính năng bắt người tát!"
+-- ==========================================
+-- 3. CHỨC NĂNG: AUTO TÁT SIÊU VIỆT (SUPER HIT)
+-- ==========================================
+local autoSlap = false
+local function performSlap()
+    pcall(function()
+        -- 1. Ưu tiên: Kích hoạt Tool (Vật phẩm tay tát) nếu có
+        local char = player.Character
+        if char then
+            for _, tool in ipairs(char:GetChildren()) do
+                if tool:IsA("Tool") then tool:Activate() end
+            end
+            for _, tool in ipairs(player.Backpack:GetChildren()) do
+                if tool:IsA("Tool") then
+                    tool.Parent = char
+                    tool:Activate()
+                end
+            end
+        end
+        -- 2. Kích hoạt phím E ảo (Vì game có chức năng E SLAP)
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+        task.wait(0.05)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+    end)
+end
+
+AutoSlapBtn.MouseButton1Click:Connect(function()
+    autoSlap = not autoSlap
+    if autoSlap then
+        AutoSlapBtn.Text = "💥 AUTO TÁT (SUPER HIT): BẬT"
+        AutoSlapBtn.AutoButtonColor = false
+        StatusText.Text = "Đang Auto Tát Mọi Đứa Gần Nhất!"
+        task.spawn(function()
+            while autoSlap do
+                performSlap()
+                task.wait(0.1) -- Tốc độ tát kinh hoàng
+            end
+        end)
     else
-        DetectorBtn.Text = "🔍 ĐOÁN NGƯỜI TÁT: [TẮT]"
-        DetectorBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-        StatusText.Text = "Đã tắt bắt người tát."
+        AutoSlapBtn.Text = "💥 AUTO TÁT (SUPER HIT): TẮT"
+        StatusText.Text = "Đã dừng Auto Tát."
     end
 end)
 
--- Theo dõi sự thay đổi máu (Health) hoặc các thuộc tính va chạm để truy vết kẻ vừa đánh
-local lastHealth = player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health or 100
+-- ==========================================
+-- 4. CHỨC NĂNG: BẮT QUẢ TANG KẺ TÁT (DETECTOR)
+-- ==========================================
+local detector = false
+local lastHealth = 100
 
-RunService.RenderStepped:Connect(function()
-    if not detectorEnabled then return end
-    pcall(function()
-        local char = player.Character
-        if not char then return end
-        local humanoid = char:FindFirstChild("Humanoid")
-        local rootPart = char:FindFirstChild("HumanoidRootPart")
-        if not humanoid or not rootPart then return end
-        
-        -- Nếu máu bịụt đột ngột (bị tát/tấn công)
-        if humanoid.Health < lastHealth then
-            local damageDealt = lastHealth - humanoid.Health
-            lastHealth = humanoid.Health
-            
-            -- Tìm người chơi đứng gần nhất trong bán kính 12 mét (thường là người vừa tát bạn)
-            local closestPlayer = nil
-            local shortestDistance = 12
-            
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                    local targetRoot = p.Character.HumanoidRootPart
-                    local dist = (rootPart.Position - targetRoot.Position).Magnitude
-                    if dist < shortestDistance then
-                        shortestDistance = dist
-                        closestPlayer = p
+-- Hàm hiển thị thông báo nổi giữa màn hình
+local function notifyCulprit(name, damage)
+    local notif = Instance.new("TextLabel", ScreenGui)
+    notif.Size = UDim2.new(0, 300, 0, 50)
+    notif.Position = UDim2.new(0.5, -150, 0.7, 0)
+    notif.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+    notif.Text = "🚨 " .. name .. " VỪA TÁT BẠN! (-" .. math.floor(damage) .. " HP)"
+    notif.TextColor3 = Color3.fromRGB(255, 255, 255)
+    notif.Font = Enum.Font.GothamBlack
+    notif.TextSize = 14
+    Instance.new("UICorner", notif).CornerRadius = UDim.new(0, 8)
+    
+    -- Hiệu ứng bay lên và mờ dần
+    local tweenInfo = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(notif, tweenInfo, {Position = UDim2.new(0.5, -150, 0.4, 0), TextTransparency = 1, BackgroundTransparency = 1})
+    tween:Play()
+    tween.Completed:Connect(function() notif:Destroy() end)
+end
+
+DetectorBtn.MouseButton1Click:Connect(function()
+    detector = not detector
+    if detector then
+        DetectorBtn.Text = "🔍 CẢNH BÁO KẺ TÁT: BẬT"
+        StatusText.Text = "Đang theo dõi radar máu..."
+    else
+        DetectorBtn.Text = "🔍 CẢNH BÁO KẺ TÁT: TẮT"
+        StatusText.Text = "Đã tắt radar."
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        pcall(function()
+            local char = player.Character
+            if char and char:FindFirstChild("Humanoid") then
+                local hm = char.Humanoid
+                if lastHealth == 100 then lastHealth = hm.Health end
+                
+                if hm.Health < lastHealth and detector then
+                    local damage = lastHealth - hm.Health
+                    lastHealth = hm.Health
+                    
+                    local root = char:FindFirstChild("HumanoidRootPart")
+                    if root then
+                        local culprit = nil
+                        local minDist = 20
+                        for _, p in pairs(Players:GetPlayers()) do
+                            if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                                local dist = (root.Position - p.Character.HumanoidRootPart.Position).Magnitude
+                                if dist < minDist then
+                                    minDist = dist
+                                    culprit = p
+                                end
+                            end
+                        end
+                        if culprit then
+                            notifyCulprit(culprit.Name, damage)
+                        end
                     end
+                elseif hm.Health > lastHealth then
+                    lastHealth = hm.Health
                 end
             end
-            
-            if closestPlayer then
-                StatusText.Text = "🚨 Kẻ vừa tát bạn: " .. closestPlayer.Name .. " (" .. math.floor(damageDealt) .. " HP)"
-            else
-                StatusText.Text = "⚠️ Bị tát từ góc khuất / ai đó gần đây!"
-            end
-        elseif humanoid.Health > lastHealth then
-            lastHealth = humanoid.Health -- Cập nhật khi hồi máu
+        end)
+    end
+end)
+
+-- ==========================================
+-- 5. CHỨC NĂNG: ESP (NHÌN XUYÊN TƯỜNG)
+-- ==========================================
+local espEnabled = false
+local espHighlights = {}
+
+local function createESP(targetPlayer)
+    if targetPlayer == player then return end
+    local char = targetPlayer.Character
+    if char and not char:FindFirstChild("ESPHighlight") then
+        local hl = Instance.new("Highlight", char)
+        hl.Name = "ESPHighlight"
+        hl.FillColor = Color3.fromRGB(255, 0, 0)
+        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+        hl.FillTransparency = 0.5
+        table.insert(espHighlights, hl)
+    end
+end
+
+ESPBtn.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    if espEnabled then
+        ESPBtn.Text = "👁️ NHÌN XUYÊN TƯỜNG (ESP): BẬT"
+        StatusText.Text = "Đã bật nhìn trộm mọi người chơi!"
+        for _, p in pairs(Players:GetPlayers()) do createESP(p) end
+        Players.PlayerAdded:Connect(function(p)
+            p.CharacterAdded:Connect(function()
+                if espEnabled then task.wait(1) createESP(p) end
+            end)
+        end)
+    else
+        ESPBtn.Text = "👁️ NHÌN XUYÊN TƯỜNG (ESP): TẮT"
+        for _, hl in pairs(espHighlights) do
+            if hl and hl.Parent then hl:Destroy() end
+        end
+        espHighlights = {}
+    end
+end)
+
+-- ==========================================
+-- 6. TĂNG TỐC ĐỘ (BỎ CHẠY TRỐN / ĐUỔI THEO)
+-- ==========================================
+SpeedBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        local hm = player.Character.Humanoid
+        if hm.WalkSpeed <= 16 then
+            hm.WalkSpeed = 50
+            SpeedBtn.Text = "⚡ TỐC ĐỘ: ĐANG CHẠY NHANH"
+            StatusText.Text = "Tốc độ: 50 (Sẵn sàng bỏ trốn!)"
+        else
+            hm.WalkSpeed = 16
+            SpeedBtn.Text = "⚡ HACK TỐC ĐỘ CHẠY"
+            StatusText.Text = "Tốc độ: Mặc định"
         end
     end)
 end)
 
--- 3. TÍNH NĂNG TỰ ĐỘNG TÁT MẠNH (AUTO STRONG SLAP)
-local autoStrongSlapEnabled = false
-AutoStrongSlapBtn.MouseButton1Click:Connect(function()
-    autoStrongSlapEnabled = not autoStrongSlapEnabled
-    if autoStrongSlapEnabled then
-        AutoStrongSlapBtn.Text = "💥 TỰ ĐỘNG TÁT MẠNH: [BẬT]"
-        AutoStrongSlapBtn.BackgroundColor3 = Color3.fromRGB(50, 160, 50)
-        StatusText.Text = "💥 Đang kích hoạt tát mạnh liên tục..."
-        
-        task.spawn(function()
-            local vim = VirtualInputManager
-            local camera = workspace.CurrentCamera
-            local viewportSize = camera.ViewportSize
-            local centerX = viewportSize.X / 2
-            local centerY = viewportSize.Y / 2
-            
-            while autoStrongSlapEnabled do
-                pcall(function()
-                    -- Giữ chuột lâu hơn một chút (hoặc nhấn nhả liên tục mô phỏng lực tụt tát mạnh) tương ứng giữa màn hình
-                    vim:SendMouseButtonEvent(centerX, centerY, 0, true, game, 1)
-                    task.wait(0.25) -- Giữ để tích lực tát mạnh
-                    vim:SendMouseButtonEvent(centerX, centerY, 0, false, game, 1)
-                end)
-                task.wait(0.5) -- Khoảng cách giữa các cú tát mạnh
-            end
-        end)
-    else
-        AutoStrongSlapBtn.Text = "💥 TỰ ĐỘNG TÁT MẠNH: [TẮT]"
-        AutoStrongSlapBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-        StatusText.Text = "Đã dừng tát mạnh tự động."
-    end
-end)
-
-ClearLogBtn.MouseButton1Click:Connect(function()
-    StatusText.Text = "Trạng thái: Đã xóa lịch sử."
-    lastHealth = player.Character and player.Character.Humanoid.Health or 100
-end)
-
-UnloadBtn.MouseButton1Click:Connect(function()
+CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
+end)
+
+-- Chống Văng Game
+player.Idled:Connect(function()
+    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.W, false, game)
+    task.wait(0.1)
+    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.W, false, game)
 end)
