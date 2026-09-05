@@ -1,57 +1,57 @@
 -- ==========================================================
--- 👑 FIND WHO SLAPPED - PREMIUM HUB V8 (MOBILE OPTIMIZED) 👑
+-- 👑 FIND WHO SLAPPED - ULTIMATE HUB V10 (HITBOX & CAM UNLOCK) 👑
 -- ==========================================================
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
-local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local camera = workspace.CurrentCamera
 
--- 1. BẢO VỆ GIAO DIỆN & TÌM ĐƯỜNG DẪN HIỆN UI TỐI ƯU NHẤT CHO MOBILE
-local function getSafeUIPath()
-    local success, result = pcall(function() return gethui() end)
-    if success and result then return result end
-    local success2, result2 = pcall(function() return CoreGui end)
-    if success2 and result2 then return result2 end
-    return player:WaitForChild("PlayerGui")
+-- 1. BẢO VỆ GIAO DIỆN TRÊN MOBILE
+local function getSafePath()
+    local success, res = pcall(function() return gethui() end)
+    if success and res then return res end
+    local success2, res2 = pcall(function() return CoreGui end)
+    if success2 and res2 then return res2 end
+    return playerGui
 end
 
-local targetParent = getSafeUIPath()
-if targetParent:FindFirstChild("FindWhoSlappedPremium") then
-    targetParent.FindWhoSlappedPremium:Destroy()
+local targetParent = getSafePath()
+if targetParent:FindFirstChild("FindWhoSlappedV10") then
+    targetParent.FindWhoSlappedV10:Destroy()
 end
 
--- 2. TẠO GIAO DIỆN (UI) HIỆN ĐẠI
+-- 2. TẠO MENU NỔI
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "FindWhoSlappedPremium"
+ScreenGui.Name = "FindWhoSlappedV10"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = targetParent
 
--- Nút Logo thu gọn
 local ToggleBtn = Instance.new("ImageButton", ScreenGui)
-ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
-ToggleBtn.Position = UDim2.new(0.02, 0, 0.2, 0)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-ToggleBtn.Image = "rbxassetid://10618928818" -- Bàn tay tát Icon
+ToggleBtn.Size = UDim2.new(0, 48, 0, 48)
+ToggleBtn.Position = UDim2.new(0.02, 0, 0.25, 0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+ToggleBtn.Image = "rbxassetid://10618928818"
 ToggleBtn.Active = true
 ToggleBtn.Draggable = true
 Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
 local stroke1 = Instance.new("UIStroke", ToggleBtn)
-stroke1.Color = Color3.fromRGB(255, 215, 0) -- Viền vàng VIP
+stroke1.Color = Color3.fromRGB(0, 255, 200)
 stroke1.Thickness = 2
 
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 260, 0, 280)
-MainFrame.Position = UDim2.new(0.15, 0, 0.2, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+MainFrame.Size = UDim2.new(0, 260, 0, 300)
+MainFrame.Position = UDim2.new(0.15, 0, 0.25, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 local stroke2 = Instance.new("UIStroke", MainFrame)
-stroke2.Color = Color3.fromRGB(255, 215, 0)
+stroke2.Color = Color3.fromRGB(0, 255, 200)
 stroke2.Thickness = 2
 
 local menuVisible = true
@@ -60,33 +60,31 @@ ToggleBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = menuVisible
 end)
 
--- Tiêu đề
 local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, 0, 0, 35)
 Title.BackgroundTransparency = 1
-Title.Text = "👑 SLAP HUB PREMIUM"
-Title.TextColor3 = Color3.fromRGB(255, 215, 0)
+Title.Text = "👑 SLAP HUB V10 (HITBOX & UNLOCK)"
+Title.TextColor3 = Color3.fromRGB(0, 255, 200)
 Title.Font = Enum.Font.GothamBlack
-Title.TextSize = 14
+Title.TextSize = 11
 
 local StatusText = Instance.new("TextLabel", MainFrame)
 StatusText.Size = UDim2.new(1, 0, 0, 20)
-StatusText.Position = UDim2.new(0, 0, 0, 35)
+StatusText.Position = UDim2.new(0, 0, 0, 30)
 StatusText.BackgroundTransparency = 1
-StatusText.Text = "Sẵn sàng thống trị server!"
+StatusText.Text = "Trạng thái: Sẵn sàng sử dụng!"
 StatusText.TextColor3 = Color3.fromRGB(150, 255, 150)
 StatusText.Font = Enum.Font.Gotham
-StatusText.TextSize = 11
+StatusText.TextSize = 10
 
--- Hàm tạo nút chuẩn VIP
-local function createButton(text, yPos, color1, color2)
+local function createBtn(text, yPos, color1, color2)
     local btn = Instance.new("TextButton", MainFrame)
-    btn.Size = UDim2.new(0.9, 0, 0, 35)
+    btn.Size = UDim2.new(0.9, 0, 0, 34)
     btn.Position = UDim2.new(0.05, 0, 0, yPos)
     btn.Text = text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 11
+    btn.TextSize = 10
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
     
     local gradient = Instance.new("UIGradient", btn)
@@ -97,194 +95,223 @@ local function createButton(text, yPos, color1, color2)
     return btn
 end
 
-local AutoSlapBtn = createButton("💥 AUTO TÁT (SUPER HIT): TẮT", 65, Color3.fromRGB(180, 40, 40), Color3.fromRGB(120, 20, 20))
-local DetectorBtn = createButton("🔍 CẢNH BÁO KẺ TÁT: TẮT", 110, Color3.fromRGB(40, 180, 40), Color3.fromRGB(20, 120, 20))
-local ESPBtn = createButton("👁️ NHÌN XUYÊN TƯỜNG (ESP): TẮT", 155, Color3.fromRGB(40, 100, 180), Color3.fromRGB(20, 60, 120))
-local SpeedBtn = createButton("⚡ HACK TỐC ĐỘ CHẠY", 200, Color3.fromRGB(150, 80, 180), Color3.fromRGB(100, 40, 120))
-local CloseBtn = createButton("❌ ĐÓNG MENU", 240, Color3.fromRGB(60, 60, 60), Color3.fromRGB(30, 30, 30))
+local AutoCocoBtn    = createBtn("🥥 AUTO NHẶT DỪA (HITBOX): TẮT", 58, Color3.fromRGB(0, 160, 120), Color3.fromRGB(0, 100, 80))
+local AutoFullHitBtn = createBtn("🎯 AUTO TÁT FULL LỰC (100%): TẮT", 100, Color3.fromRGB(200, 50, 50), Color3.fromRGB(130, 20, 20))
+local AutoSlapBtn    = createBtn("💥 AUTO TÁT LIÊN TỤC: TẮT", 142, Color3.fromRGB(220, 100, 30), Color3.fromRGB(150, 60, 20))
+local UnlockCamBtn   = createBtn("🔓 MỞ KHOÁ CAM (NHÌN RA SAU): TẮT", 184, Color3.fromRGB(120, 50, 200), Color3.fromRGB(80, 20, 140))
+local ESPBtn         = createBtn("👁️ NHÌN XUYÊN TƯỜNG (ESP): TẮT", 226, Color3.fromRGB(40, 100, 180), Color3.fromRGB(20, 60, 120))
 
--- ==========================================
--- 3. CHỨC NĂNG: AUTO TÁT SIÊU VIỆT (SUPER HIT)
--- ==========================================
-local autoSlap = false
-local function performSlap()
+-- HÀM KÍCH HOẠT NÚT MÀN HÌNH
+local function triggerGuiButton(btn)
+    if not btn or not btn:IsA("GuiButton") or not btn.Visible then return end
     pcall(function()
-        -- 1. Ưu tiên: Kích hoạt Tool (Vật phẩm tay tát) nếu có
-        local char = player.Character
-        if char then
-            for _, tool in ipairs(char:GetChildren()) do
-                if tool:IsA("Tool") then tool:Activate() end
-            end
-            for _, tool in ipairs(player.Backpack:GetChildren()) do
-                if tool:IsA("Tool") then
-                    tool.Parent = char
-                    tool:Activate()
-                end
-            end
+        if firesignal then
+            firesignal(btn.MouseButton1Click)
+            firesignal(btn.Activated)
         end
-        -- 2. Kích hoạt phím E ảo (Vì game có chức năng E SLAP)
-        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-        task.wait(0.05)
-        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+    end)
+    pcall(function()
+        if getconnections then
+            for _, conn in pairs(getconnections(btn.MouseButton1Click)) do conn:Fire() end
+            for _, conn in pairs(getconnections(btn.Activated)) do conn:Fire() end
+        end
+    end)
+    pcall(function()
+        if btn.AbsolutePosition and btn.AbsoluteSize then
+            local x = btn.AbsolutePosition.X + btn.AbsoluteSize.X / 2
+            local y = btn.AbsolutePosition.Y + btn.AbsoluteSize.Y / 2 + 36
+            VirtualInputManager:SendTouchEvent(1, Enum.UserInputState.Begin, x, y)
+            task.wait(0.01)
+            VirtualInputManager:SendTouchEvent(1, Enum.UserInputState.End, x, y)
+        end
     end)
 end
 
-AutoSlapBtn.MouseButton1Click:Connect(function()
-    autoSlap = not autoSlap
-    if autoSlap then
-        AutoSlapBtn.Text = "💥 AUTO TÁT (SUPER HIT): BẬT"
-        AutoSlapBtn.AutoButtonColor = false
-        StatusText.Text = "Đang Auto Tát Mọi Đứa Gần Nhất!"
+-- ==========================================
+-- 1. AUTO NHẶT DỪA BẰNG HITBOX / TOUCH INTEREST
+-- ==========================================
+local autoCoco = false
+AutoCocoBtn.MouseButton1Click:Connect(function()
+    autoCoco = not autoCoco
+    if autoCoco then
+        AutoCocoBtn.Text = "🥥 AUTO NHẶT DỪA (HITBOX): BẬT"
+        StatusText.Text = "Đang hút Dừa từ xa bằng Hitbox..."
         task.spawn(function()
-            while autoSlap do
-                performSlap()
-                task.wait(0.1) -- Tốc độ tát kinh hoàng
-            end
-        end)
-    else
-        AutoSlapBtn.Text = "💥 AUTO TÁT (SUPER HIT): TẮT"
-        StatusText.Text = "Đã dừng Auto Tát."
-    end
-end)
-
--- ==========================================
--- 4. CHỨC NĂNG: BẮT QUẢ TANG KẺ TÁT (DETECTOR)
--- ==========================================
-local detector = false
-local lastHealth = 100
-
--- Hàm hiển thị thông báo nổi giữa màn hình
-local function notifyCulprit(name, damage)
-    local notif = Instance.new("TextLabel", ScreenGui)
-    notif.Size = UDim2.new(0, 300, 0, 50)
-    notif.Position = UDim2.new(0.5, -150, 0.7, 0)
-    notif.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-    notif.Text = "🚨 " .. name .. " VỪA TÁT BẠN! (-" .. math.floor(damage) .. " HP)"
-    notif.TextColor3 = Color3.fromRGB(255, 255, 255)
-    notif.Font = Enum.Font.GothamBlack
-    notif.TextSize = 14
-    Instance.new("UICorner", notif).CornerRadius = UDim.new(0, 8)
-    
-    -- Hiệu ứng bay lên và mờ dần
-    local tweenInfo = TweenInfo.new(3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local tween = TweenService:Create(notif, tweenInfo, {Position = UDim2.new(0.5, -150, 0.4, 0), TextTransparency = 1, BackgroundTransparency = 1})
-    tween:Play()
-    tween.Completed:Connect(function() notif:Destroy() end)
-end
-
-DetectorBtn.MouseButton1Click:Connect(function()
-    detector = not detector
-    if detector then
-        DetectorBtn.Text = "🔍 CẢNH BÁO KẺ TÁT: BẬT"
-        StatusText.Text = "Đang theo dõi radar máu..."
-    else
-        DetectorBtn.Text = "🔍 CẢNH BÁO KẺ TÁT: TẮT"
-        StatusText.Text = "Đã tắt radar."
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(0.1)
-        pcall(function()
-            local char = player.Character
-            if char and char:FindFirstChild("Humanoid") then
-                local hm = char.Humanoid
-                if lastHealth == 100 then lastHealth = hm.Health end
-                
-                if hm.Health < lastHealth and detector then
-                    local damage = lastHealth - hm.Health
-                    lastHealth = hm.Health
-                    
-                    local root = char:FindFirstChild("HumanoidRootPart")
+            while autoCoco do
+                pcall(function()
+                    local char = player.Character
+                    local root = char and char:FindFirstChild("HumanoidRootPart")
                     if root then
-                        local culprit = nil
-                        local minDist = 20
-                        for _, p in pairs(Players:GetPlayers()) do
-                            if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                                local dist = (root.Position - p.Character.HumanoidRootPart.Position).Magnitude
-                                if dist < minDist then
-                                    minDist = dist
-                                    culprit = p
+                        for _, obj in pairs(workspace:GetDescendants()) do
+                            -- Kiểm tra vật thể Dừa (Coconut)
+                            if (obj.Name:lower():find("coconut") or obj.Name:lower():find("dừa")) then
+                                local touch = obj:FindFirstChildOfClass("TouchTransmitter") or obj:FindFirstChild("TouchInterest")
+                                local partToTouch = obj:IsA("BasePart") and obj or obj:FindFirstChildOfClass("BasePart")
+                                
+                                -- 1. Dùng TouchInterest để gặt dừa từ xa
+                                if firetouchinterest and partToTouch then
+                                    firetouchinterest(root, partToTouch, 0)
+                                    task.wait(0.01)
+                                    firetouchinterest(root, partToTouch, 1)
+                                end
+                                
+                                -- 2. Dùng ProximityPrompt từ xa
+                                local prompt = obj:FindFirstChildOfClass("ProximityPrompt")
+                                if prompt and prompt.Enabled then
+                                    if fireproximityprompt then
+                                        fireproximityprompt(prompt)
+                                    else
+                                        prompt:InputHoldBegin()
+                                        task.wait(prompt.HoldDuration)
+                                        prompt:InputHoldEnd()
+                                    end
                                 end
                             end
                         end
-                        if culprit then
-                            notifyCulprit(culprit.Name, damage)
+                    end
+                end)
+                task.wait(0.5)
+            end
+        end)
+    else
+        AutoCocoBtn.Text = "🥥 AUTO NHẶT DỪA (HITBOX): TẮT"
+        StatusText.Text = "Đã dừng hút dừa."
+    end
+end)
+
+-- ==========================================
+-- 2. AUTO TÁT FULL LỰC 100% (PERFECT HIT)
+-- ==========================================
+local autoFullHit = false
+AutoFullHitBtn.MouseButton1Click:Connect(function()
+    autoFullHit = not autoFullHit
+    if autoFullHit then
+        AutoFullHitBtn.Text = "🎯 AUTO TÁT FULL LỰC (100%): BẬT"
+        StatusText.Text = "Đang canh thanh lực để bấm 100%..."
+        task.spawn(function()
+            while autoFullHit do
+                pcall(function()
+                    -- Quét giao diện thanh đập lực tát
+                    for _, gui in pairs(playerGui:GetDescendants()) do
+                        if gui:IsA("TextButton") or gui:IsA("ImageButton") then
+                            local txt = gui:IsA("TextButton") and gui.Text:upper() or gui.Name:upper()
+                            if txt:find("HIT") or txt:find("SLAP") or txt:find("BAR") or gui.Name:find("Hit") then
+                                if gui.Visible then
+                                    -- Kiểm tra con trỏ vị trí nếu có indicator
+                                    local indicator = gui.Parent and (gui.Parent:FindFirstChild("Indicator") or gui.Parent:FindFirstChild("Bar"))
+                                    if indicator then
+                                        -- Căn chỉnh đúng thời điểm thanh ở giữa/ở điểm cao nhất
+                                        local posX = indicator.Position.X.Scale
+                                        if posX >= 0.45 and posX <= 0.55 or posX >= 0.85 then
+                                            triggerGuiButton(gui)
+                                        end
+                                    else
+                                        -- Nếu là nút !HIT! đập lực trực tiếp
+                                        triggerGuiButton(gui)
+                                    end
+                                end
+                            end
                         end
                     end
-                elseif hm.Health > lastHealth then
-                    lastHealth = hm.Health
-                end
+                end)
+                task.wait(0.02)
             end
+        end)
+    else
+        AutoFullHitBtn.Text = "🎯 AUTO TÁT FULL LỰC (100%): TẮT"
+        StatusText.Text = "Đã tắt Auto Full Lực."
+    end
+end)
+
+-- ==========================================
+-- 3. AUTO TÁT LIÊN TỤC (TỰ ĐỘNG BẤM TÁT)
+-- ==========================================
+local autoSlap = false
+AutoSlapBtn.MouseButton1Click:Connect(function()
+    autoSlap = not autoSlap
+    if autoSlap then
+        AutoSlapBtn.Text = "💥 AUTO TÁT LIÊN TỤC: BẬT"
+        StatusText.Text = "Đang tự động nhấn tát liên tục..."
+        task.spawn(function()
+            while autoSlap do
+                pcall(function()
+                    for _, gui in pairs(playerGui:GetDescendants()) do
+                        if (gui:IsA("TextButton") or gui:IsA("ImageButton")) and gui.Visible then
+                            local name = gui.Name:upper()
+                            local txt = gui:IsA("TextButton") and gui.Text:upper() or ""
+                            if name:find("SLAP") or txt:find("SLAP") or name:find("TAP") or txt:find("TAP") then
+                                triggerGuiButton(gui)
+                            end
+                        end
+                    end
+                end)
+                task.wait(0.05)
+            end
+        end)
+    else
+        AutoSlapBtn.Text = "💥 AUTO TÁT LIÊN TỤC: TẮT"
+        StatusText.Text = "Đã dừng tát liên tục."
+    end
+end)
+
+-- ==========================================
+-- 4. MỞ KHOÁ CAMERA (BẺ CAM NHÌN RA SAU KHÓA)
+-- ==========================================
+local unlockCam = false
+UnlockCamBtn.MouseButton1Click:Connect(function()
+    unlockCam = not unlockCam
+    if unlockCam then
+        UnlockCamBtn.Text = "🔓 MỞ KHOÁ CAM (NHÌN RA SAU): BẬT"
+        StatusText.Text = "Đã mở khóa Camera! Bạn có thể xoay nhìn sau lưng."
+        task.spawn(function()
+            while unlockCam do
+                pcall(function()
+                    -- Chuyển Camera về trạng thái tự do nếu bị khóa Scriptable
+                    if camera.CameraType == Enum.CameraType.Scriptable then
+                        camera.CameraType = Enum.CameraType.Custom
+                    end
+                    
+                    -- Nếu đang ngồi hoặc bị khóa hướng, hỗ trợ xoay cam 180 độ ra đằng sau
+                    local char = player.Character
+                    if char and char:FindFirstChild("HumanoidRootPart") then
+                        camera.CameraSubject = char.HumanoidRootPart
+                    end
+                end)
+                task.wait(0.1)
+            end
+        end)
+    else
+        UnlockCamBtn.Text = "🔓 MỞ KHOÁ CAM (NHÌN RA SAU): TẮT"
+        StatusText.Text = "Đã trả lại Camera mặc định."
+        pcall(function()
+            camera.CameraType = Enum.CameraType.Custom
         end)
     end
 end)
 
 -- ==========================================
--- 5. CHỨC NĂNG: ESP (NHÌN XUYÊN TƯỜNG)
+-- 5. ESP (NHÌN XUYÊN TƯỜNG)
 -- ==========================================
 local espEnabled = false
-local espHighlights = {}
-
-local function createESP(targetPlayer)
-    if targetPlayer == player then return end
-    local char = targetPlayer.Character
-    if char and not char:FindFirstChild("ESPHighlight") then
-        local hl = Instance.new("Highlight", char)
-        hl.Name = "ESPHighlight"
-        hl.FillColor = Color3.fromRGB(255, 0, 0)
-        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-        hl.FillTransparency = 0.5
-        table.insert(espHighlights, hl)
-    end
-end
+local espObjects = {}
 
 ESPBtn.MouseButton1Click:Connect(function()
     espEnabled = not espEnabled
     if espEnabled then
         ESPBtn.Text = "👁️ NHÌN XUYÊN TƯỜNG (ESP): BẬT"
-        StatusText.Text = "Đã bật nhìn trộm mọi người chơi!"
-        for _, p in pairs(Players:GetPlayers()) do createESP(p) end
-        Players.PlayerAdded:Connect(function(p)
-            p.CharacterAdded:Connect(function()
-                if espEnabled then task.wait(1) createESP(p) end
-            end)
-        end)
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= player and p.Character then
+                local hl = Instance.new("Highlight", p.Character)
+                hl.FillColor = Color3.fromRGB(255, 50, 50)
+                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                table.insert(espObjects, hl)
+            end
+        end
     else
         ESPBtn.Text = "👁️ NHÌN XUYÊN TƯỜNG (ESP): TẮT"
-        for _, hl in pairs(espHighlights) do
-            if hl and hl.Parent then hl:Destroy() end
+        for _, obj in pairs(espObjects) do
+            if obj then obj:Destroy() end
         end
-        espHighlights = {}
+        espObjects = {}
     end
-end)
-
--- ==========================================
--- 6. TĂNG TỐC ĐỘ (BỎ CHẠY TRỐN / ĐUỔI THEO)
--- ==========================================
-SpeedBtn.MouseButton1Click:Connect(function()
-    pcall(function()
-        local hm = player.Character.Humanoid
-        if hm.WalkSpeed <= 16 then
-            hm.WalkSpeed = 50
-            SpeedBtn.Text = "⚡ TỐC ĐỘ: ĐANG CHẠY NHANH"
-            StatusText.Text = "Tốc độ: 50 (Sẵn sàng bỏ trốn!)"
-        else
-            hm.WalkSpeed = 16
-            SpeedBtn.Text = "⚡ HACK TỐC ĐỘ CHẠY"
-            StatusText.Text = "Tốc độ: Mặc định"
-        end
-    end)
-end)
-
-CloseBtn.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-end)
-
--- Chống Văng Game
-player.Idled:Connect(function()
-    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.W, false, game)
-    task.wait(0.1)
-    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.W, false, game)
 end)
