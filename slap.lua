@@ -1,16 +1,13 @@
 -- ==========================================================
--- 👑 FIND WHO SLAPPED - ULTIMATE HUB V15 (FIXED) 👑
+-- 👑 SLAP HUB V16 - HOÀN CHỈNH CHO MOBILE 👑
 -- ==========================================================
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local GuiService = game:GetService("GuiService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
-local camera = workspace.CurrentCamera
 
 -- 1. DỌN DẸP GIAO DIỆN CŨ
 local function getSafeParent()
@@ -22,13 +19,13 @@ local function getSafeParent()
 end
 
 local parentGui = getSafeParent()
-if parentGui:FindFirstChild("FindWhoSlappedV15") then
-    parentGui.FindWhoSlappedV15:Destroy()
+if parentGui:FindFirstChild("FindWhoSlappedV16") then
+    parentGui.FindWhoSlappedV16:Destroy()
 end
 
--- 2. TẠO GIAO DIỆN HUB V15
+-- 2. TẠO GIAO DIỆN HUB V16
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "FindWhoSlappedV15"
+ScreenGui.Name = "FindWhoSlappedV16"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = parentGui
 
@@ -61,7 +58,7 @@ end)
 local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, 0, 0, 36)
 Title.BackgroundTransparency = 1
-Title.Text = "👑 SLAP HUB V15 (ĐÃ SỬA LỖI)"
+Title.Text = "👑 SLAP HUB V16 (MOBILE FIX)"
 Title.TextColor3 = Color3.fromRGB(255, 215, 0)
 Title.Font = Enum.Font.GothamBlack
 Title.TextSize = 13
@@ -79,104 +76,55 @@ local function createBtn(text, yPos, color)
     return btn
 end
 
-local AutoSlapBtn = createBtn("🎯 AUTO TÁT & CĂN FULL LỰC: TẮT", 50, Color3.fromRGB(180, 40, 40))
-local UnlockCamBtn= createBtn("🔓 MỞ KHÓA CAM 360 (TỰ DO XOAY): TẮT", 100, Color3.fromRGB(120, 40, 180))
-local AutoCocoBtn = createBtn("🥥 AUTO NHẶT DỪA: TẮT", 150, Color3.fromRGB(0, 140, 80))
-local EspPlayerBtn= createBtn("👁️ HIỆN XUYÊN TƯỜNG (ESP): TẮT", 200, Color3.fromRGB(40, 120, 180))
-
--- HÀM MÔ PHỎNG CLICK CHUẨN XÁC DÀNH CHO MOBILE
-local function forceClickUI(guiObj)
-    if not guiObj then return end
-    pcall(function()
-        local inset = GuiService:GetGuiInset()
-        local absPos = guiObj.AbsolutePosition
-        local absSize = guiObj.AbsoluteSize
-        local clickX = absPos.X + (absSize.X / 2)
-        local clickY = absPos.Y + (absSize.Y / 2) + inset.Y
-        
-        VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, true, game, 1)
-        task.wait(0.05)
-        VirtualInputManager:SendMouseButtonEvent(clickX, clickY, 0, false, game, 1)
-    end)
-end
+local AutoSlapBtn = createBtn("🎯 AUTO TÁT (NATIVE API): TẮT", 50, Color3.fromRGB(180, 40, 40))
+local ShowSlapperBtn = createBtn("👁️ HIỆN ẢNH NGƯỜI TÁT: TẮT", 100, Color3.fromRGB(120, 40, 180))
+local AutoCocoBtn = createBtn("🥥 AUTO NHẶT DỪA (VIỀN TRẮNG): TẮT", 150, Color3.fromRGB(0, 140, 80))
+local EspPlayerBtn = createBtn("👁️ HIỆN XUYÊN TƯỜNG (ESP): TẮT", 200, Color3.fromRGB(40, 120, 180))
 
 -- ==========================================
--- 1. SỬA LỖI AUTO TÁT & CĂN LỰC
--- (Quét đệ quy toàn bộ UI để tìm nút bất kể cấu trúc)
+-- KHUNG HIỂN THỊ AVATAR NGƯỜI TÁT Ở GÓC MÀN HÌNH
 -- ==========================================
-local autoSlap = false
-AutoSlapBtn.MouseButton1Click:Connect(function()
-    autoSlap = not autoSlap
-    if autoSlap then
-        AutoSlapBtn.Text = "🎯 AUTO TÁT & CĂN FULL LỰC: BẬT"
-        task.spawn(function()
-            while autoSlap do
-                pcall(function()
-                    for _, gui in pairs(playerGui:GetDescendants()) do
-                        if (gui:IsA("TextLabel") or gui:IsA("TextButton") or gui:IsA("ImageLabel")) and gui.Visible then
-                            local textToCheck = ""
-                            if gui:IsA("TextLabel") or gui:IsA("TextButton") then
-                                textToCheck = string.upper(gui.Text)
-                            elseif gui:IsA("ImageLabel") and gui:FindFirstChildOfClass("TextLabel") then
-                                textToCheck = string.upper(gui:FindFirstChildOfClass("TextLabel").Text)
-                            end
+local SlapperHUD = Instance.new("Frame", ScreenGui)
+SlapperHUD.Size = UDim2.new(0, 90, 0, 110)
+SlapperHUD.Position = UDim2.new(0.85, 0, 0.05, 0)
+SlapperHUD.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+SlapperHUD.Visible = false
+Instance.new("UICorner", SlapperHUD).CornerRadius = UDim.new(0, 8)
+local strokeHUD = Instance.new("UIStroke", SlapperHUD)
+strokeHUD.Color = Color3.fromRGB(255, 0, 0)
+strokeHUD.Thickness = 2
 
-                            if string.find(textToCheck, "SLAP") or textToCheck == "10" or textToCheck == "9" then
-                                -- Bấm nút SLAP ngay lập tức khi đến lượt
-                                forceClickUI(gui:IsA("GuiButton") and gui or gui.Parent)
-                            elseif string.find(textToCheck, "!HIT!") then
-                                -- Đợi 0.6 giây để thanh lực chạy lên mức xanh lá/đỏ (Max Damage) rồi mới click
-                                task.wait(0.6)
-                                forceClickUI(gui:IsA("GuiButton") and gui or gui.Parent)
-                                task.wait(1) -- Tránh spam click sau khi đã đánh
-                            end
-                        end
-                    end
-                end)
-                task.wait(0.1)
-            end
-        end)
-    else
-        AutoSlapBtn.Text = "🎯 AUTO TÁT & CĂN FULL LỰC: TẮT"
-    end
-end)
+local HUDTitle = Instance.new("TextLabel", SlapperHUD)
+HUDTitle.Size = UDim2.new(1, 0, 0, 25)
+HUDTitle.BackgroundTransparency = 1
+HUDTitle.Text = "NGƯỜI TÁT"
+HUDTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+HUDTitle.Font = Enum.Font.GothamBold
+HUDTitle.TextSize = 9
+
+local AvatarImage = Instance.new("ImageLabel", SlapperHUD)
+AvatarImage.Size = UDim2.new(0, 60, 0, 60)
+AvatarImage.Position = UDim2.new(0.5, -30, 0, 28)
+AvatarImage.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+Instance.new("UICorner", AvatarImage).CornerRadius = UDim.new(1, 0) -- Hình tròn vừa phải
+
+local NameLabel = Instance.new("TextLabel", SlapperHUD)
+NameLabel.Size = UDim2.new(1, 0, 0, 20)
+NameLabel.Position = UDim2.new(0, 0, 0, 90)
+NameLabel.BackgroundTransparency = 1
+NameLabel.Text = "None"
+NameLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+NameLabel.Font = Enum.Font.Gotham
+NameLabel.TextSize = 8
 
 -- ==========================================
--- 2. SỬA LỖI CAMERA (Ép góc nhìn tự do liên tục)
--- ==========================================
-local unlockCam = false
-local camConnection = nil
-
-UnlockCamBtn.MouseButton1Click:Connect(function()
-    unlockCam = not unlockCam
-    if unlockCam then
-        UnlockCamBtn.Text = "🔓 MỞ KHÓA CAM 360: BẬT"
-        -- Sử dụng RenderStepped để liên tục chống lại lệnh khóa Camera của Game
-        camConnection = RunService.RenderStepped:Connect(function()
-            if camera.CameraType ~= Enum.CameraType.Custom then
-                camera.CameraType = Enum.CameraType.Custom
-                camera.CameraSubject = player.Character:FindFirstChild("Humanoid")
-            end
-            player.CameraMinZoomDistance = 0.5
-            player.CameraMaxZoomDistance = 100
-        end)
-    else
-        UnlockCamBtn.Text = "🔓 MỞ KHÓA CAM 360 (TỰ DO XOAY): TẮT"
-        if camConnection then
-            camConnection:Disconnect()
-            camConnection = nil
-        end
-    end
-end)
-
--- ==========================================
--- 3. AUTO NHẶT DỪA (Tối ưu hóa)
+-- 1. AUTO NHẶT DỪA (Nhận diện viền trắng/vật phẩm)
 -- ==========================================
 local autoCoco = false
 AutoCocoBtn.MouseButton1Click:Connect(function()
     autoCoco = not autoCoco
     if autoCoco then
-        AutoCocoBtn.Text = "🥥 AUTO NHẶT DỪA: BẬT"
+        AutoCocoBtn.Text = "🥥 AUTO NHẶT DỪA (VIỀN TRẮNG): BẬT"
         task.spawn(function()
             while autoCoco do
                 pcall(function()
@@ -184,22 +132,101 @@ AutoCocoBtn.MouseButton1Click:Connect(function()
                     if root then
                         for _, v in pairs(workspace:GetDescendants()) do
                             if v:IsA("BasePart") and (v.Name:lower():find("coco") or v.Name:lower():find("nut")) then
-                                v.CanCollide = false
-                                v.CFrame = root.CFrame
+                                local highlight = v:FindFirstChildOfClass("Highlight") or v:FindFirstChild("SelectionBox")
+                                if highlight or v.Transparency < 1 then
+                                    v.CFrame = root.CFrame
+                                end
                             end
                         end
                     end
                 end)
-                task.wait(1)
+                task.wait(0.5)
             end
         end)
     else
-        AutoCocoBtn.Text = "🥥 AUTO NHẶT DỪA: TẮT"
+        AutoCocoBtn.Text = "🥥 AUTO NHẶT DỪA (VIỀN TRẮNG): TẮT"
     end
 end)
 
 -- ==========================================
--- 4. ESP HIGHLIGHT NGƯỜI CHƠI (Giữ nguyên - Hoạt động tốt)
+-- 2. AUTO TÁT (An toàn cho di động, không mất nút ảo)
+-- ==========================================
+local autoSlap = false
+AutoSlapBtn.MouseButton1Click:Connect(function()
+    autoSlap = not autoSlap
+    if autoSlap then
+        AutoSlapBtn.Text = "🎯 AUTO TÁT (NATIVE API): BẬT"
+        task.spawn(function()
+            while autoSlap do
+                pcall(function()
+                    for _, gui in pairs(playerGui:GetDescendants()) do
+                        if (gui:IsA("TextButton") or gui:IsA("ImageButton")) and gui.Visible then
+                            local txt = string.upper(gui.Name)
+                            if gui:FindFirstChildOfClass("TextLabel") then
+                                txt = txt .. " " .. string.upper(gui:FindFirstChildOfClass("TextLabel").Text)
+                            end
+                            if txt:find("SLAP") or txt:find("HIT") then
+                                for _, connection in pairs(getconnections(gui.MouseButton1Click)) do
+                                    connection:Fire()
+                                end
+                            end
+                        end
+                    end
+                end)
+                task.wait(0.2)
+            end
+        end)
+    else
+        AutoSlapBtn.Text = "🎯 AUTO TÁT (NATIVE API): TẮT"
+    end
+end)
+
+-- ==========================================
+-- 3. HIỆN ẢNH NGƯỜI TÁT BẠN
+-- ==========================================
+local showSlapper = false
+ShowSlapperBtn.MouseButton1Click:Connect(function()
+    showSlapper = not showSlapper
+    if showSlapper then
+        ShowSlapperBtn.Text = "👁️ HIỆN ẢNH NGƯỜI TÁT: BẬT"
+        SlapperHUD.Visible = true
+        
+        -- Lắng nghe sự kiện giảm máu hoặc tương tác tát từ người chơi khác
+        task.spawn(function()
+            local char = player.Character or player.CharacterAdded:Wait()
+            local humanoid = char:WaitForChild("Humanoid")
+            local lastHealth = humanoid.Health
+
+            humanoid.HealthChanged:Connect(function(health)
+                if showSlapper and health < lastHealth then
+                    -- Tìm người chơi ở gần nhất hoặc vừa tương tác để hiển thị Avatar
+                    for _, p in pairs(Players:GetPlayers()) do
+                        if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                            local dist = (p.Character.HumanoidRootPart.Position - char.HumanoidRootPart.Position).Magnitude
+                            if dist < 15 then -- Khoảng cách tát trực tiếp
+                                local thumbType = Enum.ThumbnailType.HeadShot
+                                local thumbSize = Enum.ThumbnailSize.Size150x150
+                                local content, isReady = Players:GetUserThumbnailAsync(p.UserId, thumbType, thumbSize)
+                                if isReady then
+                                    AvatarImage.Image = content
+                                    NameLabel.Text = p.Name
+                                end
+                                break
+                            end
+                        end
+                    end
+                end
+                lastHealth = health
+            end)
+        end)
+    else
+        ShowSlapperBtn.Text = "👁️ HIỆN ẢNH NGƯỜI TÁT: TẮT"
+        SlapperHUD.Visible = false
+    end
+end)
+
+-- ==========================================
+-- 4. ESP HIGHLIGHT NGƯỜI CHƠI
 -- ==========================================
 local espEnabled = false
 EspPlayerBtn.MouseButton1Click:Connect(function()
@@ -210,16 +237,13 @@ EspPlayerBtn.MouseButton1Click:Connect(function()
             while espEnabled do
                 pcall(function()
                     for _, p in pairs(Players:GetPlayers()) do
-                        if p ~= player and p.Character then
-                            local hl = p.Character:FindFirstChild("SlapESP")
-                            if not hl then
-                                hl = Instance.new("Highlight")
-                                hl.Name = "SlapESP"
-                                hl.FillColor = Color3.fromRGB(255, 0, 0)
-                                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                                hl.FillTransparency = 0.5
-                                hl.Parent = p.Character
-                            end
+                        if p ~= player and p.Character and not p.Character:FindFirstChild("SlapESP") then
+                            local hl = Instance.new("Highlight")
+                            hl.Name = "SlapESP"
+                            hl.FillColor = Color3.fromRGB(255, 0, 0)
+                            hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                            hl.FillTransparency = 0.5
+                            hl.Parent = p.Character
                         end
                     end
                 end)
