@@ -1,4 +1,4 @@
--- Underground War 2.0 Ultimate VIP Fixed & Team ESP Script
+-- Underground War 2.0 Ultimate VIP Fixed & Crosshair Aimbot
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -7,7 +7,7 @@ local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 local Camera = Workspace.CurrentCamera
 
--- Xóa GUI cũ nếu tồn tại để tránh trùng lặp lỗi
+-- Xóa GUI cũ nếu tồn tại để tránh trùng lặp
 if PlayerGui:FindFirstChild("UGW_UltimateVIP") then
     PlayerGui.UGW_UltimateVIP:Destroy()
 end
@@ -17,7 +17,7 @@ ScreenGui.Name = "UGW_UltimateVIP"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = PlayerGui
 
--- Nút mở/đóng menu nhỏ ở góc màn hình (Phòng trường hợp ẩn mất)
+-- Nút mở/đóng menu nhỏ ở góc màn hình
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Size = UDim2.new(0, 45, 0, 45)
 ToggleButton.Position = UDim2.new(0, 10, 0.4, 0)
@@ -29,7 +29,7 @@ ToggleButton.Parent = ScreenGui
 ToggleButton.Draggable = true
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 260, 0, 280)
+MainFrame.Size = UDim2.new(0, 260, 0, 290)
 MainFrame.Position = UDim2.new(0.15, 0, 0.2, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 MainFrame.BorderSizePixel = 0
@@ -46,7 +46,7 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 35)
 Title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 Title.TextColor3 = Color3.fromRGB(0, 255, 128)
-Title.Text = "Underground War 2.0 [Fixed VIP]"
+Title.Text = "Underground War 2.0 [VIP Pro Fix]"
 Title.TextSize = 13
 Title.Font = Enum.Font.SourceSansBold
 Title.Parent = MainFrame
@@ -61,20 +61,23 @@ local function createButton(name, yPos, callback)
     btn.TextSize = 12
     btn.Font = Enum.Font.SourceSansBold
     btn.Parent = MainFrame
-    btn.MouseButton1Click:Connect(callback)
+    
+    btn.MouseButton1Click:Connect(function()
+        callback(btn)
+    end)
     return btn
 end
 
--- 1. ESP Địch theo Team (Team Đỏ viền đỏ, Team Xanh viền xanh)
+-- 1. ESP Địch theo Team (Đỏ / Xanh)
 local espEnabled = false
-local espBtn = createButton("Team ESP (Đỏ/Xanh): TẮT", 42, function()
+createButton("Team ESP (Đỏ/Xanh): TẮT", 42, function(btn)
     espEnabled = not espEnabled
     if espEnabled then
-        espBtn.Text = "Team ESP (Đỏ/Xanh): BẬT"
-        espBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+        btn.Text = "Team ESP (Đỏ/Xanh): BẬT"
+        btn.TextColor3 = Color3.fromRGB(0, 255, 0)
     else
-        espBtn.Text = "Team ESP (Đỏ/Xanh): TẮT"
-        espBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.Text = "Team ESP (Đỏ/Xanh): TẮT"
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
         for _, p in pairs(Players:GetPlayers()) do
             if p.Character and p.Character:FindFirstChild("UGW_TeamHighlight") then
                 p.Character.UGW_TeamHighlight:Destroy()
@@ -94,8 +97,6 @@ RunService.RenderStepped:Connect(function()
                     hl.Name = "UGW_TeamHighlight"
                     hl.Parent = char
                 end
-                
-                -- Phân màu theo Team
                 if player.Team then
                     local tName = string.lower(player.Team.Name)
                     if tName:find("red") or player.TeamColor.Name == "Bright red" then
@@ -114,16 +115,16 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- 2. Aimbot Team + Wallcheck
+-- 2. Aimbot chuẩn theo TÂM TRÒN giữa màn hình (Crosshair) + Wallcheck
 local aimbotEnabled = false
-local aimBtn = createButton("Aimbot Team + Wallcheck: TẮT", 76, function()
+createButton("Aimbot theo Tâm (Crosshair): TẮT", 76, function(btn)
     aimbotEnabled = not aimbotEnabled
     if aimbotEnabled then
-        aimBtn.Text = "Aimbot Team + Wallcheck: BẬT"
-        aimBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+        btn.Text = "Aimbot theo Tâm (Crosshair): BẬT"
+        btn.TextColor3 = Color3.fromRGB(0, 255, 0)
     else
-        aimBtn.Text = "Aimbot Team + Wallcheck: TẮT"
-        aimBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.Text = "Aimbot theo Tâm (Crosshair): TẮT"
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     end
 end)
 
@@ -143,19 +144,26 @@ local function isVisible(targetPart)
     return false
 end
 
-local function getBestTarget()
+-- Tìm mục tiêu nằm gần tâm tròn màn hình nhất để aim
+local function getCrosshairTarget()
     local bestTarget = nil
-    local shortestDistance = math.huge
+    local shortestDistanceToCenter = math.huge
+    local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Team ~= LocalPlayer.Team and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
             local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
             if humanoid and humanoid.Health > 0 then
                 local targetPart = player.Character:FindFirstChild("Head") or player.Character.HumanoidRootPart
                 if isVisible(targetPart) then
-                    local dist = (Camera.CFrame.Position - targetPart.Position).Magnitude
-                    if dist < shortestDistance then
-                        shortestDistance = dist
-                        bestTarget = targetPart
+                    local screenPos, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
+                    if onScreen then
+                        local screenVector = Vector2.new(screenPos.X, screenPos.Y)
+                        local distToCenter = (screenVector - screenCenter).Magnitude
+                        if distToCenter < shortestDistanceToCenter then
+                            shortestDistanceToCenter = distToCenter
+                            bestTarget = targetPart
+                        end
                     end
                 end
             end
@@ -166,7 +174,7 @@ end
 
 RunService.RenderStepped:Connect(function()
     if aimbotEnabled then
-        local target = getBestTarget()
+        local target = getCrosshairTarget()
         if target then
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
         end
@@ -175,14 +183,14 @@ end)
 
 -- 3. Tự động chém kiếm (Sword Kill Aura)
 local killAuraEnabled = false
-local auraBtn = createButton("Sword Kill Aura: TẮT", 110, function()
+createButton("Sword Kill Aura: TẮT", 110, function(btn)
     killAuraEnabled = not killAuraEnabled
     if killAuraEnabled then
-        auraBtn.Text = "Sword Kill Aura: BẬT"
-        auraBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+        btn.Text = "Sword Kill Aura: BẬT"
+        btn.TextColor3 = Color3.fromRGB(0, 255, 0)
     else
-        auraBtn.Text = "Sword Kill Aura: TẮT"
-        auraBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.Text = "Sword Kill Aura: TẮT"
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     end
 end)
 
@@ -204,16 +212,16 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- 4. X-Ray Đất/Hầm (Làm mờ xuyên qua mọi lớp đất đá)
+-- 4. X-Ray Đất/Hầm (Làm mờ)
 local xrayDirtEnabled = false
-local xrayBtn = createButton("X-Ray Đất Hầm (Mờ): TẮT", 144, function()
+createButton("X-Ray Đất Hầm (Mờ): TẮT", 144, function(btn)
     xrayDirtEnabled = not xrayDirtEnabled
     if xrayDirtEnabled then
-        xrayBtn.Text = "X-Ray Đất Hầm (Mờ): BẬT"
-        xrayBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+        btn.Text = "X-Ray Đất Hầm (Mờ): BẬT"
+        btn.TextColor3 = Color3.fromRGB(0, 255, 0)
     else
-        xrayBtn.Text = "X-Ray Đất Hầm (Mờ): TẮT"
-        xrayBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.Text = "X-Ray Đất Hầm (Mờ): TẮT"
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     end
     
     for _, obj in pairs(Workspace:GetDescendants()) do
@@ -233,16 +241,16 @@ local xrayBtn = createButton("X-Ray Đất Hầm (Mờ): TẮT", 144, function()
     end
 end)
 
--- 5. Noclip Xuyên Tường/Hầm
+-- 5. Noclip Xuyên Hầm
 local noclipEnabled = false
-local noclipBtn = createButton("Noclip Xuyên Hầm: TẮT", 178, function()
+createButton("Noclip Xuyên Hầm: TẮT", 178, function(btn)
     noclipEnabled = not noclipEnabled
     if noclipEnabled then
-        noclipBtn.Text = "Noclip Xuyên Hầm: BẬT"
-        noclipBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+        btn.Text = "Noclip Xuyên Hầm: BẬT"
+        btn.TextColor3 = Color3.fromRGB(0, 255, 0)
     else
-        noclipBtn.Text = "Noclip Xuyên Hầm: TẮT"
-        noclipBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.Text = "Noclip Xuyên Hầm: TẮT"
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     end
 end)
 
@@ -256,14 +264,14 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- 6. Tốc độ & Nhảy cao
-createButton("Tốc độ nhanh (Speed 50)", 212, function()
+-- 6. Tốc độ & Reset
+createButton("Tốc độ nhanh (Speed 50)", 212, function(btn)
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid.WalkSpeed = 50
     end
 end)
 
-createButton("Reset Mặc định", 246, function()
+createButton("Reset Mặc định", 246, function(btn)
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid.WalkSpeed = 16
     end
